@@ -60,12 +60,44 @@ python -c "import json; from main import app; json.dump(app.openapi(), open('doc
 | `SECRET_KEY` | backend | Signs JWTs. Required, no default. |
 | `DATABASE_URL` | backend | `sqlite:///./internship_tracker.db` or a `postgresql://` URL. |
 | `CORS_ORIGINS` | backend | Comma-separated frontend origins allowed to call the API. |
-| `VITE_API_URL` | frontend build | API origin, e.g. `https://tracker-api.example.com`. Leave unset in development. |
+| `VITE_API_URL` | frontend build | API origin for split deploys. Leave unset for local dev, Vercel Services, and `vercel dev`. |
 
-## Deploying
+## Deploying on Vercel (Services)
+
+The repo root `vercel.json` deploys **frontend** (Vite) and **backend** (FastAPI) as one
+project. Public routing:
+
+| Path | Service |
+|------|---------|
+| `/api/*` | `backend` (internal unless reached via this rewrite) |
+| everything else | `frontend` |
+
+The SPA calls **same-origin** `/api` (do not set `VITE_API_URL` on Vercel). Run migrations
+against your production database before or after the first deploy:
+
+```bash
+cd backend && alembic upgrade head
+```
+
+**Backend** environment variables on the Vercel project (required for production):
+
+| Variable | Purpose |
+|----------|---------|
+| `SECRET_KEY` | JWT signing (generate a random value; never use `change-me`) |
+| `DATABASE_URL` | PostgreSQL URL (`postgresql://…`). SQLite is not suitable on Vercel. |
+
+`CORS_ORIGINS` is optional when the UI and API share the same deployment domain.
+
+Local check with the same routing as production:
+
+```bash
+vercel dev
+```
+
+## Deploying elsewhere (split frontend + API)
 
 1. Create a PostgreSQL database and set `DATABASE_URL`, `SECRET_KEY` and `CORS_ORIGINS`
-   (the deployed frontend origin) on the API service.
+   (the deployed frontend origin) on the API host.
 2. Build command: `pip install -r requirements.txt`. Release command: `alembic upgrade head`.
    Start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`.
 3. Build the frontend with `VITE_API_URL` set to the API origin (`npm run build`) and serve

@@ -1,7 +1,10 @@
 import axios from 'axios'
 
-// In development Vite proxies /api to the backend. For a deployed build set
-// VITE_API_URL to the API origin, e.g. https://tracker-api.example.com
+// Local `npm run dev`: Vite proxies /api → localhost:8000.
+// Vercel Services (one domain): leave VITE_API_URL unset — the browser calls
+// same-origin /api and top-level rewrites route to the backend service.
+// Split hosting (API on another origin): set VITE_API_URL to that origin
+// without a trailing slash, e.g. https://tracker-api.example.com
 const origin = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '')
 
 const api = axios.create({
