@@ -51,6 +51,9 @@ export function errorMessage(err, fallback = 'Something went wrong') {
       .join('. ')
   }
   if (err?.code === 'ERR_NETWORK') return 'Cannot reach the server'
+  if (err?.response?.status >= 500) {
+    return 'Server error — check Render env vars (SECRET_KEY, DATABASE_URL) and redeploy'
+  }
   return fallback
 }
 
