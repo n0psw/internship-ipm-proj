@@ -19,8 +19,8 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
     try {
-      if (isRegister) await register(form.name, form.email, form.password)
-      else await login(form.email, form.password)
+      if (isRegister) await register(form.name.trim(), form.email.trim(), form.password)
+      else await login(form.email.trim(), form.password)
       navigate('/dashboard')
     } catch (err) {
       setError(errorMessage(err))

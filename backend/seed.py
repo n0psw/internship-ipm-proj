@@ -3,6 +3,7 @@
 Creates demo@example.com / demo12345 with a realistic spread of applications.
 Safe to run twice: it does nothing if the demo user already exists.
 """
+import sys
 from datetime import datetime, time, timedelta, timezone
 
 import auth
@@ -16,9 +17,19 @@ DEMO_PASSWORD = "demo12345"
 def main() -> None:
     db = SessionLocal()
     try:
-        if db.query(models.User).filter_by(email=DEMO_EMAIL).first():
-            print(f"{DEMO_EMAIL} already exists, nothing to do")
-            return
+        existing = db.query(models.User).filter_by(email=DEMO_EMAIL).first()
+        if existing:
+            if "--reset" in sys.argv or not auth.verify_password(DEMO_PASSWORD, existing.password_hash):
+                apps = db.query(models.Application).filter_by(user_id=existing.id).all()
+                for a in apps:
+                    db.query(models.StatusHistory).filter_by(application_id=a.id).delete()
+                    db.delete(a)
+                db.delete(existing)
+                db.commit()
+                print(f"Resetting existing {DEMO_EMAIL}...")
+            else:
+                print(f"{DEMO_EMAIL} already exists with valid password (use --reset to recreate)")
+                return
 
         user = models.User(
             name="Demo Student", email=DEMO_EMAIL, password_hash=auth.hash_password(DEMO_PASSWORD)
