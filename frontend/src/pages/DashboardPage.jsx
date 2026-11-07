@@ -161,12 +161,22 @@ export default function DashboardPage() {
               shown={applications.length}
               total={total}
             />
-            <KanbanBoard
-              applications={applications}
-              statuses={filters.status ? [filters.status] : STATUSES}
-              onCardClick={setSelected}
-              onMove={handleMove}
-            />
+            {isFiltered && applications.length === 0 ? (
+              <section className="no-results" role="status">
+                <p>No applications match your search or filters.</p>
+                <button type="button" className="btn" id="btn-reset-empty"
+                  onClick={() => setFilters((f) => ({ ...DEFAULT_FILTERS, sort: f.sort }))}>
+                  Reset filters
+                </button>
+              </section>
+            ) : (
+              <KanbanBoard
+                applications={applications}
+                statuses={filters.status ? [filters.status] : STATUSES}
+                onCardClick={setSelected}
+                onMove={handleMove}
+              />
+            )}
           </>
         )}
       </main>

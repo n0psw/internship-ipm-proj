@@ -205,6 +205,7 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--focus); out
 .card-line .mono { text-align: right; }
 
 .empty { max-width: 520px; padding: 48px 0; display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+.no-results { padding: 40px 0; display: flex; flex-direction: column; align-items: flex-start; gap: 12px; color: var(--muted); }
 .empty h1 { font-size: 1.857rem; line-height: 1.2; }
 
 /* ── Drawer ──────────────────────────────────────────── */
