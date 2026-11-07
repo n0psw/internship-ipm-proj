@@ -44,7 +44,17 @@ pytest
 ```
 
 Covers registration and login, validation, per-user data isolation, status history,
-UTC timestamps, search and filters, and the dashboard numbers.
+UTC timestamps, search and filters, the dashboard numbers, Alembic migrations and the
+demo seed. Tests are grouped by user story: `test_auth.py` (US-01/02),
+`test_applications.py` (US-03..07, US-09), `test_dashboard.py` (US-08/10),
+`test_infrastructure.py` (migrations, seed, CORS).
+
+Frontend helpers (CSV export, date handling) have plain Node tests, no extra packages:
+
+```bash
+cd frontend
+npm test
+```
 
 For Postman, import `backend/docs/openapi.json`, or point Postman at
 http://localhost:8000/openapi.json. Regenerate the file after changing the API:
