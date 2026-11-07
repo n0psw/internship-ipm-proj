@@ -5,10 +5,31 @@ interview dates, contacts, notes and status history.
 
 - **Frontend:** React 18 + Vite (`frontend/`)
 - **Backend:** FastAPI + SQLAlchemy + Alembic (`backend/`)
-- **Database:** SQLite by default (set `DATABASE_URL` to use PostgreSQL)
+- **Database:** PostgreSQL 16 in Docker; SQLite for quick local runs and tests (`DATABASE_URL`)
+- **Docker:** `docker-compose.yml` runs db + backend + frontend (nginx) together
 - **Auth:** email + password (bcrypt), JWT bearer tokens
 
-## Run locally
+## Run with Docker (recommended)
+
+Needs Docker with Compose. One command starts PostgreSQL, the API and the web app.
+
+```bash
+cp .env.example .env      # set SECRET_KEY and POSTGRES_PASSWORD (see the comments inside)
+docker compose up --build
+```
+
+- App: http://localhost:8080 (nginx serves the React build and proxies `/api` to the backend)
+- API docs: http://localhost:8080/docs
+- The backend applies Alembic migrations on every start.
+- Demo data (`demo@example.com` / `demo12345`): `docker compose exec backend python seed.py`
+  (add `--reset` to recreate it).
+- Database shell: `docker compose exec db psql -U internship`
+- Stop: `docker compose down`. Add `-v` to also delete the database volume.
+
+Postgres is published on `127.0.0.1:5432` only, so you can use `psql` or run the tests
+against it (see Tests). Change ports with `APP_PORT` and `POSTGRES_PORT` in `.env`.
+
+## Run locally without Docker
 
 ### Backend
 
@@ -43,6 +64,16 @@ cd backend
 pytest
 ```
 
+By default the tests use a temporary SQLite file. To run the same tests on PostgreSQL,
+start the `db` service, create a dedicated database (its tables are dropped and recreated,
+so the name must contain `test`) and pass its URL:
+
+```bash
+docker compose up -d db
+docker compose exec db psql -U internship -c "CREATE DATABASE internship_test"
+TEST_DATABASE_URL=postgresql://internship:<POSTGRES_PASSWORD>@localhost:5432/internship_test pytest
+```
+
 Covers registration and login, validation, per-user data isolation, status history,
 UTC timestamps, search and filters, the dashboard numbers, Alembic migrations and the
 demo seed. Tests are grouped by user story: `test_auth.py` (US-01/02),
@@ -68,7 +99,7 @@ python -c "import json; from main import app; json.dump(app.openapi(), open('doc
 | Variable | Where | Purpose |
 |---|---|---|
 | `SECRET_KEY` | backend | Signs JWTs. Required, no default. |
-| `DATABASE_URL` | backend | `sqlite:///./internship_tracker.db` (default) or a `postgresql://` URL. |
+| `DATABASE_URL` | backend | `sqlite:///./internship_tracker.db` (default) or a `postgresql://` URL (set automatically by Docker Compose). |
 | `CORS_ORIGINS` | backend | Comma-separated frontend origins allowed to call the API. |
 
 ## Status pipeline

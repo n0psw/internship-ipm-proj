@@ -4,8 +4,14 @@ import tempfile
 from pathlib import Path
 
 # Must be set before the app modules are imported.
+# SQLite in a temp file by default. To run the same tests on PostgreSQL:
+#   TEST_DATABASE_URL=postgresql://user:pass@localhost:5432/internship_test pytest
+# (the tables of that database are dropped and recreated, use a dedicated one).
 _db = Path(tempfile.mkdtemp()) / "test.db"
-os.environ["DATABASE_URL"] = f"sqlite:///{_db}"
+_url = os.environ.get("TEST_DATABASE_URL") or f"sqlite:///{_db}"
+if not _url.startswith("sqlite") and "test" not in _url.rsplit("/", 1)[-1]:
+    raise RuntimeError("TEST_DATABASE_URL must point to a database whose name contains 'test': tests drop all tables.")
+os.environ["DATABASE_URL"] = _url
 os.environ["SECRET_KEY"] = "test-secret-key-not-for-production"
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
