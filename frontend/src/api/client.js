@@ -1,14 +1,8 @@
 import axios from 'axios'
 
-// Local `npm run dev`: Vite proxies /api → localhost:8000.
-// Vercel Services (one domain): leave VITE_API_URL unset — the browser calls
-// same-origin /api and top-level rewrites route to the backend service.
-// Split hosting (API on another origin): set VITE_API_URL to that origin
-// without a trailing slash, e.g. https://tracker-api.example.com
-const origin = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '')
-
+// `npm run dev`: Vite proxies /api → localhost:8000.
 const api = axios.create({
-  baseURL: `${origin}/api`,
+  baseURL: '/api',
   headers: { 'Content-Type': 'application/json' },
 })
 
@@ -52,7 +46,7 @@ export function errorMessage(err, fallback = 'Something went wrong') {
   }
   if (err?.code === 'ERR_NETWORK') return 'Cannot reach the server'
   if (err?.response?.status >= 500) {
-    return 'Server error — check Render env vars (SECRET_KEY, DATABASE_URL) and redeploy'
+    return 'Server error — check the backend logs'
   }
   return fallback
 }

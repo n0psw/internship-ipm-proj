@@ -6,15 +6,7 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env")
 
-# Vercel Marketplace (Neon, etc.) often injects POSTGRES_URL instead of DATABASE_URL.
-DATABASE_URL = (
-    os.getenv("DATABASE_URL")
-    or os.getenv("POSTGRES_URL")
-    or os.getenv("POSTGRES_PRISMA_URL")
-    or os.getenv("DATABASE_URL_UNPOOLED")
-    or os.getenv("POSTGRES_URL_NON_POOLING")
-    or "sqlite:///./internship_tracker.db"
-)
+DATABASE_URL = os.getenv("DATABASE_URL") or "sqlite:///./internship_tracker.db"
 
 
 def get_secret_key() -> str:
