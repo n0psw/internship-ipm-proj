@@ -118,6 +118,8 @@ class _ApplicationFields(BaseModel):
     def http_url_only(cls, v):
         if v is None:
             return v
+        if re.search(r"\s", v):  # "kaspi careers" is not a link
+            raise ValueError("Job URL must be a valid http or https link")
         # "host:8080/path" is a port, "javascript:..." / "mailto:..." is a scheme.
         if "://" not in v:
             if re.match(r"^[a-z][a-z0-9+.-]*:(?!\d)", v, re.IGNORECASE):

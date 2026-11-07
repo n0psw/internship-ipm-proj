@@ -68,7 +68,7 @@ def get_stats(
         add(app, "follow_up", app.follow_up_date.isoformat(), at_midnight(app.follow_up_date), app.follow_up_date < today)
 
     window_end = now + timedelta(days=HORIZON_DAYS + 1)
-    for app in db.query(A).filter(A.user_id == uid, A.interview_date != None, A.interview_date >= now, A.interview_date <= window_end):  # noqa: E711
+    for app in db.query(A).filter(A.user_id == uid, active, A.interview_date != None, A.interview_date >= now, A.interview_date <= window_end):  # noqa: E711
         when = app.interview_date
         when = when.replace(tzinfo=timezone.utc) if when.tzinfo is None else when.astimezone(timezone.utc)
         add(app, "interview", when.isoformat().replace("+00:00", "Z"), when, False)
